@@ -3,14 +3,17 @@ require("dotenv").config();
 const express = require("express");
 const initMiddleware = require("./config/middleware");
 const initRoutes = require("./routes");
+const initMongo = require("./db");
 const app = express();
 
 // Middleware
 initMiddleware(app)
 
 //Database
+initMongo()
 
 //Routes
+app.get('/',(req,res)=>res.send("hello"))
 initRoutes(app)
 
 // Global Error Handler. IMPORTANT function params MUST start with err
