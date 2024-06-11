@@ -2,68 +2,54 @@ const Joi = require("joi");
 const notesModel = require("../models/notesModel");
 const { putPreSignedUrl, getPreSignedUrl } = require("../services/awsServices");
 const { awsEnv } = require("../config/envConfig");
-const { createProduct } = require("./paymentController");
+const { createProduct, deleteProduct } = require("./paymentController");
 
 module.exports.create = async (req, res) => {
-  const { title, cost, coverLocation, language, topics, pdfLocation, name } =
-    req.body;
-  const check = {
-    language: Joi.string().required().min(4).max(256),
-    topics: Joi.array(),
-    name: Joi.string().required().min(4).max(256),
-    coverLocation: Joi.string().required().min(4).max(256),
-    pdfLocation: Joi.string().required().min(4).max(256),
-    title: Joi.string().required().min(4).max(256),
-    cost: Joi.number().required().greater(0),
-  };
-  const { error } = Joi.valid(
-    { title, cost, coverLocation, language, topics, pdfLocation, name },
-    check
-  );
-  if (error) {
-    res.status(400).send(error);
-  }
+  const { title, cost, language, topics, name } = req.body;
+  let stripeProduct;
   // if successful, update stripe services
   try {
-    createProduct(name, cost);
+    stripeProduct = await createProduct(name, cost);
   } catch (error) {
     res.status(400).send({ error: error });
   }
   // Update mongoose db
   try {
-    const notesDoc = new notesModel({
+    const notesDoc = new notesMoel({
       title,
       cost,
-      coverLocation,
       language,
       topics,
-      pdfLocation,
       name,
+      stripeProductId: stripeProduct?.id,
+      stripeDefaultPriceId: stripeProduct?.default_price?.id,
     });
     const doc = await notesDoc.save();
 
     res.status(200).json({ createdDoc: doc });
   } catch (error) {
-    // delete the stripe products
+    // delete the stripe products 
+    console.error(error)
   }
 };
 
 module.exports.getAll = async (req, res) => {
-  console.log("Per", notesModel);
-  res.status(200).json(notesModel);
+  console.log(req.user)
+  res.status(200).json('some');
 };
 
 module.exports.getSignedUrl = async (req, res) => {
   try {
     const { type, name, action } = req.body;
+    let url;
     if (action === "get") {
-      const url = getPreSignedUrl(awsEnv.notesBucketName, `${type}/${name}`);
+      url = await getPreSignedUrl(awsEnv.notesBucketName, `${type}/${name}`);
     } else if (action === "put") {
-      const url = putPreSignedUrl(awsEnv.notesBucketName, `${type}/${name}`);
+      url = await putPreSignedUrl(awsEnv.notesBucketName, `${type}/${name}`);
     }
-
-    req.status(200).json({ url });
+    console.log(url);
+    res.status(200).json({ url });
   } catch (error) {
-    req.status(400).send(error);
+    res.status(400).send(error);
   }
 };

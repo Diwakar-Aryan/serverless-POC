@@ -25,7 +25,7 @@ const getS3Client = async () => {
 
 const putObject = async (bucket, key, object) => {
   try {
-    const client = getS3Client();
+    const client = await getS3Client();
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
@@ -54,12 +54,16 @@ const getObject = async (bucket, key) => {
 
 const putPreSignedUrl = async (bucket, key) => {
   try {
-    const client = getS3Client();
+    const client = await getS3Client();
+
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
     });
-    return getSignedUrl(client, command, { expiresIn: 3600 });
+
+    const data =  await getSignedUrl(client, command);
+
+    return data
   } catch (error) {
     throw new error();
   }

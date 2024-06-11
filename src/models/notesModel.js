@@ -8,7 +8,9 @@ const notesSchema = new mongoose.Schema(
         coverLocation: String,
         language: String,
         topics: Array,
-        pdfLocation: String
+        pdfLocation: String,
+        stripeProductId: String,
+        stripeDefaultPriceId: String
     },
     {timestamps: true}
 )
