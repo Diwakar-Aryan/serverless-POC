@@ -12,6 +12,7 @@ const notesSchema = new mongoose.Schema(
         stripeProductId: String,
         stripeDefaultPriceId: String
     },
+    { typeKey: '$type' },
     {timestamps: true}
 )
 

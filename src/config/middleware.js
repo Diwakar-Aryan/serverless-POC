@@ -2,12 +2,14 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet')
 const cors = require('cors')
-const logger = require('morgan')
+const logger = require('morgan');
+const express = require('express');
 const debug = require('debug')('middleware')
 
 const initMiddleware = (app) => {
    debug('Initializing Middlewares ...');
-
+   
+   app.use(express.json())
    app.use(bodyParser.json())
    app.use(bodyParser.urlencoded({ extended: false }))
    app.use(cookieParser())

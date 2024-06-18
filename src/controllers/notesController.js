@@ -3,6 +3,7 @@ const notesModel = require("../models/notesModel");
 const { putPreSignedUrl, getPreSignedUrl } = require("../services/awsServices");
 const { awsEnv } = require("../config/envConfig");
 const { createProduct, deleteProduct } = require("./paymentController");
+const { userRecordsModel } = require("../models/userModels");
 
 module.exports.create = async (req, res) => {
   const { title, cost, language, topics, name } = req.body;
@@ -15,7 +16,7 @@ module.exports.create = async (req, res) => {
   }
   // Update mongoose db
   try {
-    const notesDoc = new notesMoel({
+    const notesDoc = new notesModel({
       title,
       cost,
       language,
@@ -28,14 +29,43 @@ module.exports.create = async (req, res) => {
 
     res.status(200).json({ createdDoc: doc });
   } catch (error) {
-    // delete the stripe products 
-    console.error(error)
+    // delete the stripe products
+    console.error(error);
   }
 };
 
 module.exports.getAll = async (req, res) => {
-  console.log(req.user)
-  res.status(200).json('some');
+  try {
+    const notes = await notesModel.find({});
+  
+    console.log(notes);
+    res.status(200).json(notes);
+    
+  } catch (error) {
+    res.status(400).json({error: true});
+  }
+};
+
+module.exports.getLockedNotesByUser = async (req, res) => {
+  try {
+    
+    const userRecord = await userRecordsModel.findOne({
+      userId: req.user.userId,
+      email: req.user.email,
+    });
+  
+    for (const prods of userRecord.stripeProductIds) {
+      productIds.push(String(prods));
+    }
+  
+    const notes = await notesModel
+      .find({ stripeProductId: { $in: productIds } })
+      .lean();
+  
+    res.status(200).json(notes);
+  } catch (error) {
+    res.status(400).json({error: true});
+  }
 };
 
 module.exports.getSignedUrl = async (req, res) => {
