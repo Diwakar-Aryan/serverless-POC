@@ -48,7 +48,7 @@ module.exports.getAll = async (req, res) => {
 
 module.exports.getLockedNotesByUser = async (req, res) => {
   try {
-    
+    const productIds = []
     const userRecord = await userRecordsModel.findOne({
       userId: req.user.userId,
       email: req.user.email,

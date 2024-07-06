@@ -92,3 +92,17 @@ module.exports.deleteProduct = async (productId) => {
   const product = await stripe.products.del(productId);
   return product;
 };
+
+module.exports.getHistory = async (req, res) => {
+
+  try {
+    const userId = req?.user?.userId;
+    const cursor = await paymentHistoryModel.find({userId,paymentStatus: "complete"}).lean()
+
+    res.status(200).json({data: cursor})
+
+  } catch (error) {
+    res.status(400).send({error: true })
+  }
+
+}

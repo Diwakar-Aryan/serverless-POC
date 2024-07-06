@@ -3,7 +3,7 @@ const router = express.Router()
 const notesController = require('../controllers/notesController');
 const { authenticate } = require('../services/authService');
 
-router.get('/', notesController.getAll);
+router.get('/',authenticate,notesController.getAll);
 router.get('/locked',authenticate,notesController.getLockedNotesByUser);
 router.post('/getSignedUrl',notesController.getSignedUrl)
 router.post('/create',notesController.create);
